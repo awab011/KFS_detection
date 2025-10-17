@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'detection_node = KFS_detection.yolo_node:main'
         ],
     },
 )
