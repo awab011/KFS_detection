@@ -6,6 +6,9 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from std_msgs.msg import String
 from sensor_msgs.msg import CompressedImage
+import os
+from pathlib import Path
+
 
 #YOLO and Attribute classifier 
 import cv2
@@ -22,8 +25,13 @@ class DetectionNode(Node):
     def __init__(self):
         super().__init__('detection_node')
 
-        self.main_detector = YOLO("/home/parallels/Demo1/src/weights/Initial_detection.pt")
-        self.second_detector = YOLO("/home/parallels/Demo1/src/weights/Authenticity.pt")
+        BASE_DIR = Path(__file__).resolve().parent
+        weights_dir = BASE_DIR / "weights"
+        detector_path = weights_dir / "Initial_detection.pt"
+        authenticator_path = weights_dir / "Authenticity.pt"
+
+        self.main_detector = YOLO(str(detector_path))
+        self.second_detector = YOLO(str(authenticator_path))
 
 
         self.Main_classes = ["Red_KFS", "Blue_KFS", #boxes
