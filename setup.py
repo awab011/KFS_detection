@@ -10,6 +10,9 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (package_name + '/weights', ['KFS_detection/weights/Initial_detection.pt',
+                                     'KFS_detection/weights/Authenticity.pt']),
+
     ],
     install_requires=['setuptools'],
     zip_safe=True,
