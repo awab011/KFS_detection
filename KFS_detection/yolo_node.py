@@ -5,6 +5,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from std_msgs.msg import String
+from sensor_msgs.msg import CompressedImage
 
 #YOLO and Attribute classifier 
 import cv2
@@ -30,28 +31,18 @@ class DetectionNode(Node):
         self.Second_classes = ["r1", "r2", "fake"]
 
         self.bridge = CvBridge()
-        #self.sub = self.create_subscription(Image, "/camera/image_raw", self.image_callback, 10)
+        self.sub = self.create_subscription(CompressedImage, "/camera1/image_compressed", self.image_callback, 10)
         self.pub_debug = self.create_publisher(Image, "detection/debug_image", 10)
         self.pub_info = self.create_publisher(String, "debugging/info", 10)
 
-        # For debuging perposes can comment out later - Start
-        self.cap = cv2.VideoCapture(0)
-
-        if not self.cap.isOpened():
-            self.get_logger().error("Camera not accessible. ")
-            return
-        self.timer = self.create_timer(0.03, self.timer_callback)
-
-        #End
-        #later change to image_callback
-    def timer_callback(self): # ,msg):
+       
+    def image_callback(self ,msg):
         
-        ret, frame = self.cap.read()
-        if not ret:
-            self.get_logger().warn("Failed to read frame from camera.")
-            return
+        np_arr = np.frombuffer(msg.data, np.uint8)
+        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-        #frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
+
+        # frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
         results = self.main_detector(frame)
         #results = self.main_detector.track(frame, tracker="bytetrack.yaml", conf=0.8)
 
@@ -105,12 +96,12 @@ class DetectionNode(Node):
         if info_msgs:
             self.pub_info.publish(String(data="; ".join(info_msgs)))
         
-        if cv2.waitKey(1) & 0xFF == 27:  # Press ESC to quit
-            self.get_logger().info("Exiting...")
-            self.cap.release()
-            cv2.destroyAllWindows()
-            self.timer.cancel()
-            rclpy.shutdown()
+        #if cv2.waitKey(1) & 0xFF == 27:  # Press ESC to quit
+        #    self.get_logger().info("Exiting...")
+         #   self.cap.release()
+          #  cv2.destroyAllWindows()
+           # self.timer.cancel()
+           # rclpy.shutdown()
 
 def main(args=None):
     rclpy.init(args=args)
